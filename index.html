@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#0ea5e9">
+    <link rel="manifest" href="manifest.json">
+    <title>نادي الرجاء العراقي</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="bg-slate-50 text-slate-900 overflow-x-hidden pb-16">
+    <div id="app-container" class="max-w-md mx-auto min-h-screen relative bg-white shadow-xl flex flex-col">
+        </div>
+    
+    <div id="install-prompt" class="fixed inset-0 bg-slate-900/80 z-50 flex items-end sm:items-center justify-center p-4 hidden transition-opacity">
+        <div class="bg-white rounded-t-2xl sm:rounded-2xl w-full max-w-sm p-6 flex flex-col items-center text-center animate-slide-up transform transition-transform">
+            <img src="./icon-512.png" alt="شعار النادي" class="w-24 h-24 mb-4 object-cover rounded-full shadow-md border-2 border-slate-100" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJjdXJyZW50Q29sb3IiIHN0cm9rZS13aWR0aD0iMiI+PGNpcmNsZSBjeD0iMTIiIGN5PSIxMiIgcj0iMTAiLz48cGF0aCBkPSJNMTIgOGgudDAxIi8+PHBhdGggZD0iTTEyIDEyYTIgMiAwIDAgMSAyejEiLz48L3N2Zz4='">
+            <h3 class="text-xl font-bold mb-2 text-slate-900">تثبيت التطبيق</h3>
+            <p class="text-slate-500 text-sm mb-6">قم بتثبيت تطبيق نادي الرجاء العراقي للحصول على تجربة أفضل والوصول السريع للأخبار والنتائج.</p>
+            <div class="flex flex-col w-full gap-3">
+                <button id="btn-install" class="w-full bg-blue-600 text-white rounded-xl py-3 font-bold shadow-md shadow-blue-500/20 active:bg-blue-700 transition">تثبيت الآن</button>
+                <button id="btn-skip-install" class="w-full bg-slate-100 text-slate-600 rounded-xl py-3 font-medium active:bg-slate-200 transition">تخطي</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="script.js"></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js');
+            });
+        }
+
+        let deferredPrompt;
+        const installPrompt = document.getElementById('install-prompt');
+        const btnInstall = document.getElementById('btn-install');
+        const btnSkip = document.getElementById('btn-skip-install');
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            if(!localStorage.getItem('pwa_install_skipped')) {
+                installPrompt.classList.remove('hidden');
+            }
+        });
+
+        btnInstall.addEventListener('click', async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                deferredPrompt = null;
+                installPrompt.classList.add('hidden');
+            }
+        });
+
+        btnSkip.addEventListener('click', () => {
+            installPrompt.classList.add('hidden');
+            localStorage.setItem('pwa_install_skipped', 'true');
+        });
+        
+        window.addEventListener('appinstalled', () => {
+             installPrompt.classList.add('hidden');
+             deferredPrompt = null;
+        });
+    </script>
+</body>
+</html>
